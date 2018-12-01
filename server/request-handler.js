@@ -12,6 +12,10 @@ this file and include it in basic-server.js so that it actually works.
 
 **************************************************************/
 var http = require('http');
+var bodyParser = require('body-parser');
+var express = require('express');
+const app = express();
+
 
 var requestHandler = function(request, response) {
   // Request and Response come from node's http module.
@@ -29,6 +33,7 @@ var requestHandler = function(request, response) {
   // debugging help, but you should always be careful about leaving stray
   // console.logs in your code.
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
+  console.log(request, 'serving request');
   // The outgoing status.
   var statusCode = 200;
   request.url = '/classes/messages';
@@ -46,19 +51,40 @@ var requestHandler = function(request, response) {
 
   // .writeHead() writes to the request line and headers of the response,
   // which includes the status and all headers.
-  response.writeHead(statusCode, headers);
+  // response.writeHead(statusCode, headers);
 
-  // let body = [];
-  // request.on('error', (err) => {
-  //   console.error(err);
-  // }).on('data', (chunk) => {
-  //   body.push(chunk);
-  // }).on('end', () => {
-  //   body = Buffer.concat(body).toString();
-  //   // At this point, we have the headers, method, url and body, and can now
-  //   // do whatever we need to in order to respond to this request.
-  // });
-  // debugger;
+  console.log(statusCode, headers, 'statusCode + headers');
+
+  let messages = [];
+  if (request.method === 'GET') { 
+    // console.log('hellosafsaef');
+    response.writeHead(statusCode, headers);
+    response.end(JSON.stringify({messages}));
+  }
+
+  if (request.method === 'POST') {
+    debugger;
+    app.post('/api/data', (request, response) => {
+      const postBody = request.body;
+      console.log(postBody);
+    });
+    
+    // response.statusCode = 201;
+    response.writeHead(201, headers);
+    console.log(response, 'right before server response');
+    response.end();
+  }
+  // if (request.method === 'POST') {
+  //   let body = '';
+  //   request.on('data', chunk => {
+  //     body += chunk.toString(); // convert Buffer to string
+  //   });
+  //   request.on('end', () => {
+  //     console.log(body);
+  //     res.end('ok');
+  //   });
+  // }
+
   // Make sure to always call response.end() - Node may not send
   // anything back to the client until you do. The string you pass to
   // response.end() will be the body of the response - i.e. what shows
@@ -66,12 +92,12 @@ var requestHandler = function(request, response) {
   //
   // Calling .end "flushes" the response's internal buffer, forcing
   // node to actually send all the data over to the client.
-  console.log(request, 'this is the request');
-  console.log(response, 'this is the response');
-  console.log(headers, 'this is the headers');
+  // console.log(request, 'this is the request');
+  // console.log(response, 'this is the response');
+  // console.log(headers, 'this is the headers');
   // debugger;
   // response.write(response);
-  response.end('Hello, World!');
+  // response.end('Hello, World!');
 };
 
 // These headers will allow Cross-Origin Resource Sharing (CORS).
