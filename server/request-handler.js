@@ -12,12 +12,11 @@ this file and include it in basic-server.js so that it actually works.
 
 **************************************************************/
 var http = require('http');
-var bodyParser = require('body-parser');
-var express = require('express');
-const app = express();
+// const stream = require('stream');
+const fs = require('fs');
 
+var requestHandler = function (request, response) {
 
-var requestHandler = function(request, response) {
   // Request and Response come from node's http module.
   //
   // They include information about both the incoming request, such as
@@ -37,7 +36,7 @@ var requestHandler = function(request, response) {
   // The outgoing status.
   var statusCode = 200;
   request.url = '/classes/messages';
-  
+
 
   // See the note below about CORS headers.
   var headers = defaultCorsHeaders;
@@ -55,35 +54,40 @@ var requestHandler = function(request, response) {
 
   console.log(statusCode, headers, 'statusCode + headers');
 
-  let messages = [];
-  if (request.method === 'GET') { 
-    // console.log('hellosafsaef');
+  let body = [];
+  if (request.method === 'GET') {
+    let results = [];
+    request.on('data', (chunk) => {
+      results.push(chunk);
+    }).on('end', () => {
+      results = Buffer.concat(results).toString();
+      // at this point, `results` has the entire request results stored in it as a string
+      // debugger;
+      response.statusCode = 201;
+      // response.setHeader('Content-Type', 'application/json');
+      // response.write(JSON.stringify(results));
+    });
+
     response.writeHead(statusCode, headers);
-    response.end(JSON.stringify({messages}));
+    response.end(JSON.stringify({ results }));
   }
 
   if (request.method === 'POST') {
-    debugger;
-    app.post('/api/data', (request, response) => {
-      const postBody = request.body;
-      console.log(postBody);
+    // let body = [];
+    request.on('data', (chunk) => {
+      body.push(chunk);
+    }).on('end', () => {
+      body = Buffer.concat(body).toString();
+      // at this point, `body` has the entire request body stored in it as a string
+      debugger;
+      response.statusCode = 201;
+      // response.setHeader('Content-Type', 'application/json');
+      // response.write(JSON.stringify(body));
     });
-    
-    // response.statusCode = 201;
+
     response.writeHead(201, headers);
-    console.log(response, 'right before server response');
     response.end();
   }
-  // if (request.method === 'POST') {
-  //   let body = '';
-  //   request.on('data', chunk => {
-  //     body += chunk.toString(); // convert Buffer to string
-  //   });
-  //   request.on('end', () => {
-  //     console.log(body);
-  //     res.end('ok');
-  //   });
-  // }
 
   // Make sure to always call response.end() - Node may not send
   // anything back to the client until you do. The string you pass to
@@ -92,12 +96,6 @@ var requestHandler = function(request, response) {
   //
   // Calling .end "flushes" the response's internal buffer, forcing
   // node to actually send all the data over to the client.
-  // console.log(request, 'this is the request');
-  // console.log(response, 'this is the response');
-  // console.log(headers, 'this is the headers');
-  // debugger;
-  // response.write(response);
-  // response.end('Hello, World!');
 };
 
 // These headers will allow Cross-Origin Resource Sharing (CORS).
