@@ -104,4 +104,40 @@ describe('Node Server Request Listener Function', function () {
     expect(res._ended).to.equal(true);
   });
 
+  it('Should properly keep track of multiple posts', function () {
+    var stubMsg = {
+      username: 'Jono',
+      text: 'Do my bidding!'
+    };
+    var req = new stubs.request('/classes/messages', 'POST', stubMsg);
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    var stubMsg2 = {
+      username: 'onoJ',
+      text: '!gniddib ym oD'
+    };
+    var req = new stubs.request('/classes/messages', 'POST', stubMsg2);
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    req = new stubs.request('/classes/messages', 'GET');
+    res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    expect(res._responseCode).to.equal(200);
+    var messages = JSON.parse(res._data).results;
+    expect(messages.length).to.be.above(0);
+    expect(messages[messages.length - 1].username).to.equal('onoJ');
+    expect(messages[messages.length - 1].text).to.equal('!gniddib ym oD');
+    expect(res._ended).to.equal(true);
+  });
+
+  it('Should properly keep track of multiple posts', function () {
+
+  });
+
 });

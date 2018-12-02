@@ -1,19 +1,20 @@
 /*************************************************************
 
-You should implement your request handler function in this file.
+ You should implement your request handler function in this file.
 
-requestHandler is already getting passed to http.createServer()
-in basic-server.js, but it won't work as is.
+ requestHandler is already getting passed to http.createServer()
+ in basic-server.js, but it won't work as is.
 
-You'll have to figure out a way to export this function from
-this file and include it in basic-server.js so that it actually works.
+ You'll have to figure out a way to export this function from
+ this file and include it in basic-server.js so that it actually works.
 
-*Hint* Check out the node module documentation at http://nodejs.org/api/modules.html.
+ *Hint* Check out the node module documentation at http://nodejs.org/api/modules.html.
 
-**************************************************************/
+ **************************************************************/
 var http = require('http');
 // const stream = require('stream');
-const fs = require('fs');
+
+let results = [];
 
 var requestHandler = function (request, response) {
 
@@ -31,11 +32,9 @@ var requestHandler = function (request, response) {
   // Adding more logging to your server can be an easy way to get passive
   // debugging help, but you should always be careful about leaving stray
   // console.logs in your code.
-  console.log('Serving request type ' + request.method + ' for url ' + request.url);
-  console.log(request, 'serving request');
+  // console.log('Serving request type ' + request.method + ' for url ' + request.url);
+  // console.log(request, 'serving request');
   // The outgoing status.
-  var statusCode = 200;
-  request.url = '/classes/messages';
 
 
   // See the note below about CORS headers.
@@ -50,37 +49,27 @@ var requestHandler = function (request, response) {
 
   // .writeHead() writes to the request line and headers of the response,
   // which includes the status and all headers.
-  // response.writeHead(statusCode, headers);
-
-  console.log(statusCode, headers, 'statusCode + headers');
-
-  let body = [];
   if (request.method === 'GET') {
-    let results = [];
-    request.on('data', (chunk) => {
-      results.push(chunk);
-    }).on('end', () => {
-      results = Buffer.concat(results).toString();
-      // at this point, `results` has the entire request results stored in it as a string
+    // debugger;
+    if (request.url !== '/classes/messages') {
       // debugger;
-      response.statusCode = 201;
-      // response.setHeader('Content-Type', 'application/json');
-      // response.write(JSON.stringify(results));
-    });
-
-    response.writeHead(statusCode, headers);
-    response.end(JSON.stringify({ results }));
+      response.writeHead(404, headers);
+      response.end();
+    } else {
+      response.writeHead(200, headers);
+      response.end(JSON.stringify({ results }));
+    }
   }
 
   if (request.method === 'POST') {
-    // let body = [];
+    let body = [];
     request.on('data', (chunk) => {
       body.push(chunk);
     }).on('end', () => {
       body = Buffer.concat(body).toString();
       // at this point, `body` has the entire request body stored in it as a string
-      debugger;
-      response.statusCode = 201;
+      // debugger;
+      results.push(JSON.parse(body));
       // response.setHeader('Content-Type', 'application/json');
       // response.write(JSON.stringify(body));
     });
