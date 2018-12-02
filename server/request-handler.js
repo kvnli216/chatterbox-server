@@ -36,7 +36,6 @@ var requestHandler = function (request, response) {
   // console.log(request, 'serving request');
   // The outgoing status.
 
-
   // See the note below about CORS headers.
   var headers = defaultCorsHeaders;
 
@@ -49,6 +48,7 @@ var requestHandler = function (request, response) {
 
   // .writeHead() writes to the request line and headers of the response,
   // which includes the status and all headers.
+
   if (request.method === 'GET') {
     // debugger;
     if (request.url !== '/classes/messages') {
